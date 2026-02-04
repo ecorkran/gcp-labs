@@ -60,7 +60,11 @@ gcloud storage buckets notifications create gs://${DATA_BUCKET} \
 gcloud storage buckets notifications list gs://${DATA_BUCKET}
 ```
 
-You should see output showing the notification config with `event_types: OBJECT_FINALIZE`. Note that OBJECT_FINALIZE is a system-provided Cloud Storage event. There are several, including:
+You should see output showing the notification config with `event_types: OBJECT_FINALIZE`.
+
+**Troubleshooting:** If you get an error about the Cloud Storage service account not existing, wait 10 seconds and retry the `notifications create` command. GCP provisions service accounts asynchronously, and occasionally the Pub/Sub topic is created before the Cloud Storage service account is ready. A retry always succeeds.
+
+Note that OBJECT_FINALIZE is a system-provided Cloud Storage event. There are several, including:
 ```sh
 OBJECT_FINALIZE         # object created or overwritten
 OBJECT_DELETE           # object deleted
@@ -338,18 +342,17 @@ You should see export records with gaugeId, dataType, size, and processedAt time
 # Then fetch with signed URL:
 curl "$SERVICE_URL/exports" | python3 -m json.tool
 
-# Pick an ID from the response and:
-export EXPORT_ID={the id you picked}
+# Pick an ID from the response (the "id" field, without braces):
+export EXPORT_ID=your_actual_id_here
 curl "$SERVICE_URL/exports/${EXPORT_ID}" | python3 -m json.tool
 ```
 
-The response includes a `signedUrl` you can open in a browser to download the file.
-If you run into permission errors, and you might, it's probably a permissions issue, but you can check. First, check the raw output:
+The response should include a `signedUrl` you can open in a browser to download the file. If you run into permission errors, and you might, it's probably a permissions issue, but you can check. First, check the raw output:
 ```sh
 curl $SERVICE_URL/exports
 ```
 
-If you see something like a 500 error here, check the logs
+If you see something like a 500 error here (or no URL), check the logs
 ```
 gcloud run services logs read riverpulse-api --region us-central1 --limit 10
 ```
@@ -364,7 +367,7 @@ gcloud iam service-accounts add-iam-policy-binding \
   --role="roles/iam.serviceAccountTokenCreator"
 ```
 
-Now redeploy. You'll need to use the `--clear-base-image` as mentioned above:
+Now redeploy.  Use this method as git will show no changes. You'll need to use the `--clear-base-image` as mentioned above:
 ```sh
 cd ~/riverpulse-api
 gcloud run deploy riverpulse-api \

@@ -108,8 +108,8 @@ EOF
 gcloud storage buckets update "gs://${DATA_BUCKET}" \
   --lifecycle-file=/tmp/lifecycle.json
 
-# Verify
-gcloud storage buckets describe "gs://${DATA_BUCKET}" --format="json(lifecycle)"
+# Verify (note: this may show as empty initially, but rules are applied)
+gcloud storage buckets describe "gs://${DATA_BUCKET}" --format="json(lifecycle_config)"
 ```
 
 This means:
@@ -122,9 +122,16 @@ This means:
 
 ## Step 4: Generate Signed URLs
 
-Signed URLs let the portal serve private data without exposing credentials. The service account we create here persists for the life of the project, but the URL is valid only as long as we specify in the duration (1 hour in this case).
+Signed URLs let the portal serve private data without exposing credentials. To sign URLs, we need a service account and permission for your user account to impersonate it.
 
-First, you need a service account key (for local testing):
+First, grant your user account permission to impersonate service accounts (required for signing):
+```bash
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member="user:YOUR_EMAIL@gmail.com" \
+  --role="roles/iam.serviceAccountTokenCreator"
+```
+
+Now create the storage service account:
 ```bash
 # Create a service account for signing
 gcloud iam service-accounts create riverpulse-storage \
@@ -135,7 +142,7 @@ gcloud storage buckets add-iam-policy-binding "gs://${DATA_BUCKET}" \
   --member="serviceAccount:riverpulse-storage@${PROJECT_ID}.iam.gserviceaccount.com" \
   --role="roles/storage.objectViewer"
 
-# Grant signing permission
+# Grant the service account signing permission
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member="serviceAccount:riverpulse-storage@${PROJECT_ID}.iam.gserviceaccount.com" \
   --role="roles/iam.serviceAccountTokenCreator"
@@ -145,18 +152,13 @@ gcloud storage sign-url \
   "gs://${DATA_BUCKET}/gauge-001/2026-01-31/export.csv" \
   --duration=1h \
   --region=us-central1 \
-  --impersonate-service-account="riverpulse-storage@${PROJECT_ID}.iam.gserviceaccount.com"  
+  --impersonate-service-account="riverpulse-storage@${PROJECT_ID}.iam.gserviceaccount.com"
 ```
 
-If you receive a permission error, your user account probably needs permission to impersonate the service account. Grant that here. If it still doesn't work, wait at least 60 seconds for IAM update propagation and try again.
-```sh
-gcloud iam service-accounts add-iam-policy-binding \
-  riverpulse-storage@${PROJECT_ID}.iam.gserviceaccount.com \
-  --member="user:YOUR_EMAIL@gmail.com" \
-  --role="roles/iam.serviceAccountTokenCreator"
-```
+Copy the signed URL and open it in your browser—you can access the file without authentication, even though the bucket is private.
 
-Copy the signed URL and open it in a browser - you can access the file without authentication.
+**Troubleshooting:** If you get a permission error on `gcloud storage sign-url`, wait at least 60 seconds for IAM propagation and try again. IAM changes don't apply instantly.
+
 
 ---
 
@@ -292,8 +294,7 @@ EOF
 
 gcloud storage buckets update "gs://${DATA_BUCKET}" --cors-file=/tmp/cors.json
 
-# Verify. Note lab originally had just cors, not cors_config, resulting in the
-# null error mentioned below.
+# Verify. Note lab originally had just cors, not cors_config, resulting in the null error mentioned below.
 gcloud storage buckets describe "gs://${DATA_BUCKET}" --format="json(cors_config)"
 
 # if you receive a null, try with full filename, no quotes

@@ -23,7 +23,7 @@ MQTT_SUBSCRIBE_TOPIC = "riverpulse/#"  # Subscribe to ALL riverpulse messages
 
 # Pub/Sub configuration
 PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT", "YOUR_PROJECT_ID")
-PUBSUB_TOPIC = "device-events"  # Reuse the topic from Lab 1
+PUBSUB_TOPIC = "sensor-events"  # Reuse the topic from Lab 1
 
 # Initialize Pub/Sub publisher
 publisher = pubsub_v1.PublisherClient()

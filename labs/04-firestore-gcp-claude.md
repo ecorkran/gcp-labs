@@ -47,25 +47,18 @@ The console is actually faster than CLI for Firestore exploration. We'll use bot
 
 ---
 
-## Step 2: Install Firestore CLI Tools
+## Step 2: Update API to Use Firestore
 
-For CLI operations, we'll use the Firebase CLI (works with GCP Firestore). Note that this npm install is intended to be *local*, and not run in gcloud. It's also optional and just included for completeness. Cloud Console will be easier for this lab.
+**Pro Tip: Firebase CLI (optional)**
+
+If you want Firebase CLI tools for local development, you can install them on your machine (not in Cloud Shell - it doesn't have npm):
 ```bash
-# If you have npm
 npm install -g firebase-tools
-
-# Login (opens browser)
 firebase login
-
-# Or use gcloud for basic operations
-# gcloud firestore is more limited but works
 ```
-
-For this lab, we'll primarily use the Python SDK from within Cloud Run.
+Firebase CLI is useful for local testing and more advanced operations, but for this lab we'll use the Python SDK and Cloud Console, which are simpler.
 
 ---
-
-## Step 3: Update API to Use Firestore
 
 ```bash
 cd ~/riverpulse-api
@@ -312,7 +305,7 @@ Streaming. `query.stream()` is a generator -- it yields documents one at a time.
 Firestore SDK `.document(id)` will never return `None` even if the document doesn't exist. Check the `exists` property to confirm existence.
 
 ---
-## Step 4: Deploy Updated API
+## Step 3: Deploy Updated API
 
 ```bash
 gcloud run deploy riverpulse-api \
@@ -326,7 +319,7 @@ The Cloud Run service account automatically has Firestore access.
 
 ---
 
-## Step 5: Register Gauges
+## Step 4: Register Gauges
 
 ```bash
 SERVICE_URL=$(gcloud run services describe riverpulse-api --region us-central1 --format 'value(status.url)')
@@ -352,7 +345,7 @@ Check Firestore console - you should see the `gauges` collection with documents.
 
 ---
 
-## Step 6: Create Readings via Pub/Sub
+## Step 5: Create Readings via Pub/Sub
 
 ```bash
 # Publish readings (will be stored in Firestore via push subscription)
@@ -380,6 +373,22 @@ curl $SERVICE_URL/readings | python3 -m json.tool
 
 ---
 
+## Step 6: Create Composite Index (Required for Complex Queries)
+
+Firestore requires indexes for queries with multiple filters or filter + orderBy. Our API queries by `gaugeId` and `timestamp`, so we need an index.
+
+```bash
+# Create the index via gcloud
+gcloud firestore indexes composite create \
+--collection-group=readings \
+--field-config field-path=gaugeId,order=ASCENDING \
+--field-config field-path=timestamp,order=DESCENDING
+```
+
+**Note:** Index creation takes a few minutes. You can proceed to the queries below while it builds.
+
+---
+
 ## Step 7: Query Readings
 
 ```bash
@@ -396,7 +405,12 @@ curl "$SERVICE_URL/readings?gaugeId=gauge-001&condition=high" | python3 -m json.
 curl $SERVICE_URL/stats | python3 -m json.tool
 ```
 
-If the above queries don't work, you will need to create the index (Step 9) first. Examine the log to see any further details or confirmation of this.
+If queries fail with an index error, check that your index has finished building:
+```sh
+gcloud firestore indexes list
+```
+
+You can also check the service logs:
 ```sh
 gcloud run services logs read riverpulse-api --region us-central1 --limit 10
 ```
@@ -411,24 +425,6 @@ Open Cloud Console → Firestore:
 3. Try the query builder: Filter where `condition == "high"`
 
 This visual exploration is valuable for understanding the data model.
-
----
-
-## Step 9: Create Composite Index (Required for Complex Queries)
-
-Firestore requires indexes for queries with multiple filters or filter + orderBy.
-
-Our query `where('gaugeId', '==', x).order_by('timestamp', DESCENDING)` needs an index.
-
-```bash
-# Create the index via gcloud
-gcloud firestore indexes composite create \
---collection-group=readings \
---field-config field-path=gaugeId,order=ASCENDING \
---field-config field-path=timestamp,order=DESCENDING
-```
-
-Or Firestore will show an error with a link to create the index automatically when you first run the query.
 
 ---
 

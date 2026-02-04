@@ -146,13 +146,24 @@ if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=port, debug=True)
 ```
 
-Optional: it could be useful to update the local test section and re-test locally, but that is not yet done here.
-
-Recommended: push this to a git repo and use a Personal Access Token (PAT).
+**Recommended:** Push this to a git repo now. You'll need it for Lab 6 (Cloud Build CI/CD). 
+Use a [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) 
+for authentication instead of your password.
 
 ---
 ## Step 2: Redeploy
 
+**First, verify you're in your project directory:**
+```bash
+pwd  # Should show ~/riverpulse-api or similar
+```
+
+If you see `.config`, `.docker`, `.rustup`, or other system directories, you're in your home directory. Navigate to your project first:
+```bash
+cd ~/riverpulse-api  # or wherever you created your project
+```
+
+Now redeploy:
 ```bash
 gcloud run deploy riverpulse-api \
 --source . \
@@ -160,6 +171,8 @@ gcloud run deploy riverpulse-api \
 --region us-central1 \
 --memory 256Mi
 ```
+
+If you receive errors, ensure that you are running from your `~/riverpulse-api` directory, not home directory.
 
 ---
 ## Step 3: Create Push Subscription

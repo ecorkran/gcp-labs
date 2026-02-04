@@ -14,14 +14,22 @@
 One topic can have multiple subscriptions. Each subscription gets its own copy of every message. This is how one reading can trigger both "save to database" and "check for alerts" independently.
 
 ---
+
 ## Setup
 
-```bash
-# Set your project (replace with your project ID)
-gcloud config set project YOUR_PROJECT_ID
+If you haven't already, follow the **Getting Started** section in the [README](../README.md):
+- Select your riverpulse-demo project
+- Open Cloud Shell at console.cloud.google.com
 
+Then continue below.
+
+```bash
 # Verify you're in the right project
 gcloud config get-value project
+
+# If not, set project, and get-value again to verify
+# i.e. gcloud config set project riverpulse-demo
+gcloud config set project YOUR_PROJECT_ID
 
 # Enable Pub/Sub API (may already be enabled)
 gcloud services enable pubsub.googleapis.com

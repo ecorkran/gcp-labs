@@ -36,13 +36,15 @@ EOF
 git add .
 git commit -m "RiverPulse API with Firestore"
 
-# Create repo on GitHub (or use gh cli)
-# gh repo create riverpulse-api --private --source=. --push
+# Create repo on GitHub and push
+# Option A: Using gh CLI (easiest)
+gh repo create riverpulse-api --private --source=. --push
 
-# Or manually:
-# 1. Create repo on github.com
+# Option B: Manually via github.com
+# 1. Go to github.com and create a new repo named "riverpulse-api" (private)
 # 2. git remote add origin https://github.com/YOUR_USERNAME/riverpulse-api.git
-# 3. git push -u origin main
+# 3. git branch -M main  # Rename branch to main if needed
+# 4. git push -u origin main
 ```
 
 ---
@@ -53,7 +55,6 @@ This file defines your build pipeline.
 
 ```bash
 cd ~/riverpulse-api
-
 cat > cloudbuild.yaml << 'EOF'
 # Cloud Build configuration for RiverPulse API
 # Triggered on push to main branch
@@ -227,16 +228,16 @@ gcloud builds triggers create github \
 ## Step 7: Test the Pipeline
 
 ```bash
-cd ~/riverpulse-api
-
-# Make a small change
+# If needed, make a small change
 echo "# CI/CD enabled" >> README.md
 
-# Commit and push
+```bash
+cd ~/riverpulse-api
 git add .
-git commit -m "Enable CI/CD pipeline"
-git push origin main
+git commit -m "RiverPulse API with Firestore and CI/CD"
+git push -u origin main
 ```
+
 
 Watch the build:
 1. Cloud Console → Cloud Build → History
@@ -303,7 +304,7 @@ Update `cloudbuild.yaml` step 1 to uncomment the test line:
 - python -m pytest tests/ -v
 ```
 
-Now pushes will run tests before deploying.
+Now pushes will run tests before deploying.  Verify by committing and pushing these latest changes.
 
 ---
 
@@ -350,20 +351,6 @@ Now pushes will run tests before deploying.
 - "Cloud Build runs in isolated containers, so the build environment is reproducible. No 'works on my machine' issues."
 
 - "For a production system, I'd extend this to multiple environments: push to main deploys to staging, manual approval promotes to production. Could also add integration tests that hit the staging API before production promotion."
-
----
-
-## Bonus: Manual Build (Without Trigger)
-
-Useful for testing cloudbuild.yaml:
-
-```bash
-# Submit build manually
-gcloud builds submit --config=cloudbuild.yaml .
-
-# Watch in console or:
-gcloud builds log --stream $(gcloud builds list --limit=1 --format='value(id)')
-```
 
 ---
 
