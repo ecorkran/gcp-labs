@@ -1,0 +1,66 @@
+# Cloud Build configuration for RiverPulse API
+# Triggered on push to main branch
+
+steps:
+  # Step 1: Run tests (if you have them)
+  - name: 'python:3.11-slim'
+    id: 'test'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install -r requirements.txt
+        python -m pytest tests/ -v  
+        
+  # Step 2: Build container image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:latest'
+      - '.'
+
+  # Step 3: Push to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push'
+    args:
+      - 'push'
+      - '--all-tags'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}'
+
+  # Step 4: Deploy to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy'
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE}'
+      - '--image'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '512Mi'
+      - '--set-env-vars'
+      - 'MEDIA_BUCKET=riverpulse-data-${PROJECT_ID}'
+
+# Substitution variables (can be overridden in trigger config)
+substitutions:
+  _REGION: us-central1
+  _SERVICE: riverpulse-api
+  _REPO: riverpulse-repo
+
+# Build options
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+# Images to store in Artifact Registry
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:latest'

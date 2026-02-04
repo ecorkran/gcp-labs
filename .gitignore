@@ -1,0 +1,36 @@
+# macOS Finder
+.DS_Store
+**/.DS_Store
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# GCP/Google Cloud
+gcloud-*.json
+service-account-*.json
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+Thumbs.db
