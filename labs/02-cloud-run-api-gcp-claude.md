@@ -37,7 +37,8 @@ mkdir -p ~/riverpulse-api
 cd ~/riverpulse-api
 ```
 
-Create `main.py`:
+Click 'Open Editor' and create `main.py`:
+
 ```python
 from flask import Flask, jsonify, request
 import os
@@ -103,7 +104,11 @@ web: gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
 ```
 
 ---
-## Step 2: Test Locally (Optional but Recommended)
+## Step 2: Test in Cloud Shell (Optional)
+
+**This is optional.** You can skip straight to deployment (Step 3) if you prefer. But testing in Cloud Shell before deploying to Cloud Run is useful - you catch errors faster without waiting for the build.
+
+Test in Cloud Shell:
 
 ```bash
 # Create virtual environment
@@ -115,7 +120,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-In another terminal:
+In another gcloud terminal shell (click '+'):
 ```bash
 # Test health endpoint
 curl http://localhost:8080/
@@ -132,7 +137,7 @@ curl http://localhost:8080/readings
 curl "http://localhost:8080/readings?gaugeId=gauge-001"
 ```
 
-Stop the local server (Ctrl+C) and deactivate:
+Stop the local server (Ctrl+C in main terminal) and deactivate:
 
 ```bash
 deactivate
@@ -200,8 +205,10 @@ curl $SERVICE_URL/gauges/gauge-001/readings
 # Stream logs in real-time
 gcloud run services logs read riverpulse-api --region us-central1 --limit 50
 
-# Or tail logs
-gcloud run services logs tail riverpulse-api --region us-central1
+# For realtime log streaming, you can use tail, but you will need to
+# use the beta version, and install log-streaming.  Logs read is 
+# sufficient for this lab.
+# gcloud beta run services logs tail riverpulse-api --region us-central1
 ```
 
 You can also view logs in Cloud Console: Cloud Run → riverpulse-api → Logs tab. Note that logs tail is only available in beta as of 20260131 and requires some extra package installs so skipped for this lab.
@@ -238,13 +245,10 @@ gcloud run services update riverpulse-api \
 
 For secrets, use Secret Manager (covered in a later lab).
 
-*Note: if you experience issues here, run `gcloud auth login` and follow the prompts. Additionally you may want to update the account in gcloud config.*
-```sh
-gcloud config set account YOUR_EMAIL
-```
 
 ---
 ## Cleanup (Optional)
+It is recommended to only run cleanup here if you will restart fresh rather than proceeding through the lab series.
 
 ```bash
 # Delete the service

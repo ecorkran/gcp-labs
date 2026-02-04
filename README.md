@@ -56,6 +56,52 @@ opportunity for improvement.  Maybe this becomes that. For now, it's a hands-on 
 
 ---
 
+## Getting Started
+
+**Prerequisites:**
+- Google Cloud account (GCP free tier covers everything here)
+- Open [console.cloud.google.com](https://console.cloud.google.com) and create a new project:
+    * Click the project dropdown in the top navigation bar
+    * Click "New Project" and enter "riverpulse-demo" for the project name
+- Open the Cloud Shell terminal in the console (button in top-right, or press `` ` ``)
+
+**Quick setup in Cloud Shell:**
+```bash
+gcloud config set project riverpulse-demo  # Set project
+```
+
+If you get authentication errors, run:
+```sh
+gcloud auth list  # See your authenticated account
+gcloud config set account YOUR_EMAIL@gmail.com  # Set as active
+```
+
+**Credential issues during labs?** If `gcloud` commands fail with permission errors later (especially during deployments), your credentials may have expired. Refresh them:
+```sh
+gcloud auth application-default login
+```
+
+**That's it.** All tools you need (`gcloud`, `git`, Python) are already in Cloud Shell.
+
+Then follow the labs in order. Each lab has specific `gcloud` commands to enable the APIs you need.
+
+---
+
+## Pro Tip: Use an AI Assistant
+
+These labs are designed to be worked through independently, but you'll learn faster and deeper if you use an AI assistant (Claude, Gemini, ChatGPT, etc.) alongside them.
+
+**How to use it effectively:**
+- **When stuck:** Don't just ask for the answer. Explain your understanding first ("I think the issue is that the Pub/Sub subscription isn't pushing to the right endpoint because..."). Let the AI confirm, correct, or fill gaps.
+- **When it works:** Ask "why did that work?" - have a hypothesis first, then test it against the AI's explanation.
+- **Before starting:** Ask for explanations of GCP concepts so you have context for what you're building.
+- **During debugging:** Paste error messages and discuss what you think they mean.
+- **As you build:** Have the AI explain the architecture piece by piece.
+
+The goal is understanding, not just copy-paste. An AI accelerates learning when you're thinking critically alongside it. The person who can explain their code to an interviewer is the person who thought through it, not the person who followed steps.
+
+---
+
 ## Labs
 
 | Lab | Topic | Time | What You'll Discuss in Interviews |
@@ -147,10 +193,7 @@ Swap "gauges" for wildlife cameras, weather stations, or industrial monitors and
 
 I needed to learn GCP quickly. Generic tutorials with disconnected toy examples don't stick. So I built something I actually care about.
 
-I've been in whitewater for years - riverboarding, mostly, which means you're in the water, not on it. I check these gauges. I understand why the data matters and why "optimal" is personal. Building around a domain I know made the learning stick and makes the architecture easier to explain.
-
-![Riverboarding the Horns of God, Nantahala Cascades](assets/nantahala-cascades.jpg)
-*Riverboarding "Horns of God" on the Nantahala Cascades. Photo by Paul Parsons.*
+I've been in whitewater for years - riverboarding, mostly, which means you're in the water, not on it. I check these gauges, understand why the data matters, and why "optimal" is personal. Building around a domain I know made the learning stick and makes the architecture easier to explain.
 
 ---
 
@@ -197,6 +240,10 @@ gcp-labs/
 ```
 
 ---
+
+![Riverboarding the Horns of God, Nantahala Cascades](assets/nantahala-cascades.jpg)
+
+*Riverboarding "Horns of God" on the Nantahala Cascades. Photo by Paul Parsons.*
 
 ## License
 

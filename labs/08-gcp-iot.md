@@ -120,7 +120,8 @@ gcloud compute ssh mqtt-broker --zone=us-central1-a
 Once inside the VM:
 If in Cloud Console (gcloud), it's easiest to do this with multiple tabs. Use one for project level, one for SSH and the subscription, and a third (also with SSH) for publish.
 ```bash
-# Check Mosquitto is running
+# Check Mosquitto is running. Note if it is not present, wait a few minutes as the
+# initial update scripts may still be running.
 systemctl status mosquitto
 
 # Check it's listening on port 1883
@@ -463,7 +464,7 @@ Note on setup: this is again easiest to do with three terminal tabs:
 
 Now run the gauge simulator and watch messages flow through:
 ```bash
-# In the same SSH session (bridge is in background)
+# You can do this in same SSH session as bridge, or run one in each:
 python3 ~/gauge_simulator.py
 ```
 
@@ -523,7 +524,6 @@ cd ~/riverpulse-api
 Add this to your `main.py` (or create a new file if you prefer). Remember, at this point, we're just pushing everything to the same pub/sub endpoint, no special routing for heartbeats or other, no separate endpoints for different topics and subscriptions. A real app would certainly have this processing. Here we're just adding REST endpoints.
 ```python
 # ============ GAUGE REGISTRY ============
-
 @app.route('/gauges/register', methods=['POST'])
 def register_gauge():
     """

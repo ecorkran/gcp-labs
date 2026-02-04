@@ -37,7 +37,7 @@ def on_message(client, userdata, msg):
 def publish_heartbeat(client):
     """Device health check - sent every 60 seconds in production."""
     payload = {
-        "deviceId": DEVICE_ID,
+        "gaugeId": DEVICE_ID,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "type": "heartbeat",
         "battery": round(random.uniform(60, 100), 1),
@@ -54,7 +54,7 @@ def publish_heartbeat(client):
 def publish_telemetry(client):
     """Environmental sensor readings - sent every 5 minutes in production."""
     payload = {
-        "deviceId": DEVICE_ID,
+        "gaugeId": DEVICE_ID,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "type": "telemetry",
         "temperature": round(random.uniform(-10, 35), 1),
