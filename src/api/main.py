@@ -253,8 +253,7 @@ def get_gauge_exports(gauge_id):
     """Get signed URLs for data exports associated with a gauge."""
     
     # Construct base path
-    bucket_name = os.environ.get('DATA_BUCKET', f"riverpulse-data-{os.environ.get('GOOGLE_CLOUD_PROJECT', 'unknown')}")
-    
+    bucket_name = os.environ.get('DATA_BUCKET', f"{os.environ.get('GOOGLE_CLOUD_PROJECT', 'unknown')}-riverpulse-data")    
     bucket = storage_client.bucket(bucket_name)
     
     # List objects for this gauge

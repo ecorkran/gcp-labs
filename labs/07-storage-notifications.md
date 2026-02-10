@@ -49,7 +49,7 @@ gcloud pubsub subscriptions create data-uploads-debug \
 
 ```bash
 PROJECT_ID=$(gcloud config get-value project)
-DATA_BUCKET="riverpulse-data-${PROJECT_ID}"
+DATA_BUCKET="${PROJECT_ID}-riverpulse-data"
 
 # Create notification - fires on object finalize (create/overwrite)
 gcloud storage buckets notifications create gs://${DATA_BUCKET} \

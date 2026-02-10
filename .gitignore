@@ -2,6 +2,9 @@
 .DS_Store
 **/.DS_Store
 
+# temporary, until they are ready for public release
+series-2/
+
 # Python
 venv/
 __pycache__/

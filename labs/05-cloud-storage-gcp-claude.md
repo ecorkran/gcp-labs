@@ -28,14 +28,14 @@ We create buckets with `--uniform-bucket-level-access`. This means permissions a
 PROJECT_ID=$(gcloud config get-value project)
 
 # Create bucket for data (must be globally unique)
-DATA_BUCKET="riverpulse-data-${PROJECT_ID}"
+DATA_BUCKET=f"${PROJECT_ID}-riverpulse-data"
 gcloud storage buckets create gs://${DATA_BUCKET} \
   --location=us-central1 \
   --default-storage-class=STANDARD \
   --uniform-bucket-level-access
 
 # Create bucket for gauge snapshots/images (separate for access control)
-SNAPSHOTS_BUCKET="riverpulse-snapshots-${PROJECT_ID}"
+SNAPSHOTS_BUCKET="${PROJECT_ID}-riverpulse-snapshots"
 gcloud storage buckets create gs://${SNAPSHOTS_BUCKET} \
   --location=us-central1 \
   --default-storage-class=STANDARD \

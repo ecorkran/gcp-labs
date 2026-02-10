@@ -6,6 +6,11 @@ Not toy examples - a system that can solve a real problem for a real community.
 
 ---
 
+## Important Note: Labs 9-17
+Labs 9-17 are archived in raw form.  
+
+---
+
 ## The Problem
 
 Whitewater enthusiasts - kayakers, riverboarders, rafters - need to know river conditions before driving to the put-in. USGS provides gauge data, but it's raw numbers: cubic feet per second, stage height, maybe temperature.

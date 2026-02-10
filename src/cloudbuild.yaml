@@ -48,7 +48,7 @@ steps:
       - '--memory'
       - '512Mi'
       - '--set-env-vars'
-      - 'MEDIA_BUCKET=riverpulse-data-${PROJECT_ID}'
+      - 'MEDIA_BUCKET=${PROJECT_ID}-riverpulse-data'
 
 # Substitution variables (can be overridden in trigger config)
 substitutions:

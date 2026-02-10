@@ -106,7 +106,7 @@ steps:
       - '--memory'
       - '512Mi'
       - '--set-env-vars'
-      - 'DATA_BUCKET=riverpulse-data-${PROJECT_ID}'
+      - 'DATA_BUCKET=${PROJECT-ID}-riverpulse-data'
 
 # Substitution variables (can be overridden in trigger config)
 substitutions:
