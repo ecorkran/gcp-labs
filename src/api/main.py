@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from google.cloud import firestore, storage, secretmanager
+from google.cloud import firestore, storage, secretmanager, bigquery
 import os
 import base64
 import json
@@ -21,6 +21,10 @@ db = firestore.Client()
 # Initialize Storage client
 storage_client = storage.Client()
 
+# Initialize BigQuery client
+bq_client = bigquery.Client()
+BQ_TABLE = f"{os.environ.get('GOOGLE_CLOUD_PROJECT')}.riverpulse.readings"
+
 @app.route('/')
 def health():
     return jsonify({"status": "healthy", "service": "riverpulse-api", "database": "firestore"})
@@ -37,6 +41,32 @@ def log_structured(severity, message, **kwargs):
         **kwargs
     }
     print(json.dumps(entry))
+
+# BigQuery helper
+def stream_to_bigquery(reading):
+    """
+    Stream a reading to BigQuery for analytics.
+    This runs alongside the Firestore write — both get the data.
+    Firestore for real-time queries, BigQuery for analytics.
+    """
+    try:
+        row = {
+            "gauge_id": reading.get("gaugeId"),
+            "timestamp": reading.get("timestamp", reading.get("receivedAt")),
+            "cfs": reading.get("cfs"),
+            "stage_height": reading.get("stageHeight"),
+            "water_temp": reading.get("waterTemp"),
+            "condition": reading.get("condition"),
+            "source": reading.get("source", "api"),
+            "received_at": reading.get("receivedAt"),
+        }
+        errors = bq_client.insert_rows_json(BQ_TABLE, [row])
+        if errors:
+            print(f"BigQuery streaming insert errors: {errors}")
+    except Exception as e:
+        # Don't fail the request if BQ insert fails — Firestore is primary
+        print(f"BigQuery insert failed (non-fatal): {e}")
+
 
 @app.route('/readings', methods=['GET'])
 def get_readings():
@@ -69,7 +99,6 @@ def get_readings():
 
     return jsonify({"readings": readings, "count": len(readings)})
 
-# Update the reading ingestion endpoint to use structured logging:
 @app.route('/readings', methods=['POST'])
 def create_reading():
     start_time = time.time()
@@ -91,6 +120,9 @@ def create_reading():
     # Store in Firestore (from Lab 4)
     doc_ref = db.collection('readings').document()
     doc_ref.set(reading)
+
+    # Secondary: stream to BigQuery for analytics
+    stream_to_bigquery(reading)
 
     elapsed_ms = (time.time() - start_time) * 1000
 
