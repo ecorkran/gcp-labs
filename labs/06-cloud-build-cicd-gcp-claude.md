@@ -19,7 +19,7 @@
 If you haven't already, create a GitHub repo for your API:
 
 ```bash
-cd ~/riverpulse-api
+cd ~/riverpulse/
 
 # Initialize git if needed
 git init
@@ -38,11 +38,11 @@ git commit -m "RiverPulse API with Firestore"
 
 # Create repo on GitHub and push
 # Option A: Using gh CLI (easiest)
-gh repo create riverpulse-api --private --source=. --push
+gh repo create riverpulse --private --source=. --push
 
 # Option B: Manually via github.com
-# 1. Go to github.com and create a new repo named "riverpulse-api" (private)
-# 2. git remote add origin https://github.com/YOUR_USERNAME/riverpulse-api.git
+# 1. Go to github.com and create a new repo named "riverpulse" (private)
+# 2. git remote add origin https://github.com/YOUR_USERNAME/riverpulse.git
 # 3. git branch -M main  # Rename branch to main if needed
 # 4. git push -u origin main
 ```
@@ -54,7 +54,7 @@ gh repo create riverpulse-api --private --source=. --push
 This file defines your build pipeline.
 
 ```bash
-cd ~/riverpulse-api
+cd ~/riverpulse/riverpulse-api
 cat > cloudbuild.yaml << 'EOF'
 # Cloud Build configuration for RiverPulse API
 # Triggered on push to main branch
@@ -63,6 +63,7 @@ steps:
   # Step 1: Run tests (if you have them)
   - name: 'python:3.11-slim'
     id: 'test'
+    dir: 'riverpulse-api'
     entrypoint: 'bash'
     args:
       - '-c'
@@ -73,6 +74,7 @@ steps:
   # Step 2: Build container image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build'
+    dir: 'riverpulse-api'
     args:
       - 'build'
       - '-t'
@@ -232,7 +234,7 @@ gcloud builds triggers create github \
 echo "# CI/CD enabled" >> README.md
 
 ```bash
-cd ~/riverpulse-api
+cd ~/riverpulse/riverpulse-api
 git add .
 git commit -m "RiverPulse API with Firestore and CI/CD"
 git push -u origin main

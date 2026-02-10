@@ -5,6 +5,7 @@ steps:
   # Step 1: Run tests (if you have them)
   - name: 'python:3.11-slim'
     id: 'test'
+    dir: 'riverpulse-api'
     entrypoint: 'bash'
     args:
       - '-c'
@@ -15,6 +16,7 @@ steps:
   # Step 2: Build container image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build'
+    dir: 'riverpulse-api'
     args:
       - 'build'
       - '-t'

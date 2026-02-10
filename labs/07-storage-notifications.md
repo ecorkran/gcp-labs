@@ -278,7 +278,7 @@ git push
 
 You can also manually redeploy, but will receive error when Cloud Run sees the Dockerfile and isn't sure what to do if you don't add the `--clear-base-image` here.
 ```bash
-cd ~/riverpulse-api
+cd ~/riverpulse/riverpulse-api
 gcloud run deploy riverpulse-api \
   --source . \
   --allow-unauthenticated \
@@ -369,7 +369,7 @@ gcloud iam service-accounts add-iam-policy-binding \
 
 Now redeploy.  Use this method as git will show no changes. You'll need to use the `--clear-base-image` as mentioned above:
 ```sh
-cd ~/riverpulse-api
+cd ~/riverpulse/riverpulse-api
 gcloud run deploy riverpulse-api \
   --source . \
   --allow-unauthenticated \

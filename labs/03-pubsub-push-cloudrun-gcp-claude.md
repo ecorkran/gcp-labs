@@ -23,7 +23,7 @@ This is where things actually start to connect. We have the Pub/Sub topics and t
 
 Update your Cloud Run service to handle Pub/Sub push messages.
 ```bash
-cd ~/riverpulse-api
+cd ~/riverpulse/riverpulse-api
 ```
 
 Replace `main.py` with this updated version:
@@ -160,7 +160,7 @@ pwd  # Should show ~/riverpulse-api or similar
 
 If you see `.config`, `.docker`, `.rustup`, or other system directories, you're in your home directory. Navigate to your project first:
 ```bash
-cd ~/riverpulse-api  # or wherever you created your project
+cd ~riverpulse/riverpulse-api  # or wherever you created your project
 ```
 
 Now redeploy:

@@ -309,6 +309,7 @@ except KeyboardInterrupt:
 *ProTip: if in straight nano (i.e. cloud shell), use Ctrl+V / Ctrl+Y for pgdn/pgup.*
 
 ```bash
+# Remember this is on the VM instance, you don't need the whole repo structure here.
 chmod +x ~/gauge_simulator.py
 ```
 
@@ -333,7 +334,7 @@ This is the critical piece. In the old IoT Core world, Google handled this. Now 
 Still on the VM:
 
 ```python
-# ~/mqtt_pubsub_bridge.py
+# ~/riverpulse/mqtt_pubsub_bridge.py
 #!/usr/bin/env python3
 """
 MQTT → Pub/Sub Bridge
@@ -438,6 +439,7 @@ except KeyboardInterrupt:
 ```
 
 ```sh
+# Still on the VM
 chmod +x ~/mqtt_pubsub_bridge.py
 ```
 
@@ -518,7 +520,7 @@ The gauge registry is how you track what gauges exist, whether they're online, a
 
 **Back in Cloud Shell:**
 ```bash
-cd ~/riverpulse-api
+cd ~/riverpulse/riverpulse-api
 ```
 
 Add this to your `main.py` (or create a new file if you prefer). Remember, at this point, we're just pushing everything to the same pub/sub endpoint, no special routing for heartbeats or other, no separate endpoints for different topics and subscriptions. A real app would certainly have this processing. Here we're just adding REST endpoints.

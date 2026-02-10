@@ -33,8 +33,7 @@ We'll use Flask for this.
 
 ```bash
 # Create project directory
-mkdir -p ~/riverpulse-api
-cd ~/riverpulse-api
+mkdir -p ~riverpulse/riverpulse-api && cd $_
 ```
 
 Click 'Open Editor' and create `main.py`:
@@ -147,7 +146,7 @@ deactivate
 ## Step 3: Deploy to Cloud Run
 
 ```bash
-cd ~/riverpulse-api
+cd ~/riverpulse/riverpulse-api
 
 # Deploy from source (Cloud Build creates container automatically)
 gcloud run deploy riverpulse-api \

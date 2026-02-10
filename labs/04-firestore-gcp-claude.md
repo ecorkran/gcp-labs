@@ -61,7 +61,7 @@ Firebase CLI is useful for local testing and more advanced operations, but for t
 ---
 
 ```bash
-cd ~/riverpulse-api
+cd ~/riverpulse/riverpulse-api
 ```
 
 Update `requirements.txt`:
