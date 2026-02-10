@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from google.cloud import firestore, storage
+from google.cloud import firestore, storage, secretmanager
 import os
 import base64
 import json
@@ -571,6 +571,42 @@ def fleet_status():
             summary[status] += 1
 
     return jsonify({"fleet": fleet, "summary": summary})
+
+# ============ SECRET MANAGER ============
+def get_secret(secret_id, version="latest"):
+    """
+    Retrieve a secret from Secret Manager.
+    In production, cache this — don't call on every request.
+    The project ID is automatically detected on Cloud Run.
+    """
+    client = secretmanager.SecretManagerServiceClient()
+    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT')
+    
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/{version}"
+    
+    try:
+        response = client.access_secret_version(request={"name": name})
+        return response.payload.data.decode("UTF-8")
+    except Exception as e:
+        print(f"Warning: Could not access secret {secret_id}: {e}")
+        return None
+
+# Remove or at least protect this route in production
+@app.route('/admin/config-check', methods=['GET'])
+def config_check():
+    """
+    Verify secret access is working.
+    In production, remove this endpoint or protect with authentication.
+    """
+    weather_key = get_secret("weather-api-key")
+    
+    return jsonify({
+        "secrets": {
+            "weather-api-key": "accessible" if weather_key else "NOT FOUND",
+            "key-preview": f"{weather_key[:8]}..." if weather_key else None,
+        },
+        "note": "Remove this endpoint before production"
+    })
 
 
 if __name__ == '__main__':
