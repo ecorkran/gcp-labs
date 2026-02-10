@@ -3,6 +3,7 @@ from google.cloud import firestore, storage, secretmanager
 import os
 import base64
 import json
+import time
 from datetime import datetime, timezone, timedelta
 
 # Note: Using datetime.now(timezone.utc).isoformat() produces '+00:00' suffix
@@ -25,6 +26,18 @@ def health():
     return jsonify({"status": "healthy", "service": "riverpulse-api", "database": "firestore"})
 
 # ============ READINGS ============
+def log_structured(severity, message, **kwargs):
+    """
+    Write structured log entry. Cloud Logging parses JSON automatically.
+    Severity: DEBUG, INFO, NOTICE, WARNING, ERROR, CRITICAL
+    """
+    entry = {
+        "severity": severity,
+        "message": message,
+        **kwargs
+    }
+    print(json.dumps(entry))
+
 @app.route('/readings', methods=['GET'])
 def get_readings():
     """Query readings with optional filters."""
@@ -56,25 +69,48 @@ def get_readings():
 
     return jsonify({"readings": readings, "count": len(readings)})
 
-
+# Update the reading ingestion endpoint to use structured logging:
 @app.route('/readings', methods=['POST'])
 def create_reading():
-    """Create reading directly via API."""
+    start_time = time.time()
     reading = request.get_json()
+
     if not reading:
+        log_structured("WARNING", "Empty reading received",
+                       endpoint="/readings", method="POST")
         return jsonify({"error": "No reading data provided"}), 400
 
+    # Add server timestamp
+    from datetime import datetime, timezone
     reading['receivedAt'] = datetime.now(timezone.utc).isoformat()
-    reading['source'] = 'direct'
+    
+    gauge_id = reading.get('gaugeId', 'unknown')
+    condition = reading.get('condition', 'unknown')
+    cfs = reading.get('cfs', 0)
 
-    # Use timestamp as part of document ID for ordering
-    # Or let Firestore auto-generate: db.collection('readings').add(reading)
+    # Store in Firestore (from Lab 4)
     doc_ref = db.collection('readings').document()
     doc_ref.set(reading)
 
-    return jsonify({"status": "created", "id": doc_ref.id, "reading": reading}), 201
+    elapsed_ms = (time.time() - start_time) * 1000
 
+    log_structured("INFO", "Reading ingested",
+                   gaugeId=gauge_id,
+                   condition=condition,
+                   cfs=cfs,
+                   processingTimeMs=round(elapsed_ms, 2),
+                   firestoreDocId=doc_ref.id)
 
+    # Log a warning for extreme readings
+    if cfs and cfs > 5000:
+        log_structured("WARNING", "Extreme flow reading detected",
+                       gaugeId=gauge_id,
+                       cfs=cfs,
+                       threshold=5000)
+
+    return jsonify({"status": "created", "reading": reading}), 201
+
+# is this causing duplicate?
 @app.route('/readings/<reading_id>', methods=['GET'])
 def get_reading(reading_id):
     """Get single reading by ID."""
@@ -607,7 +643,6 @@ def config_check():
         },
         "note": "Remove this endpoint before production"
     })
-
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
