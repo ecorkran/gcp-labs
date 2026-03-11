@@ -5,6 +5,7 @@ import base64
 import json
 import time
 from datetime import datetime, timezone, timedelta
+from classifier import classify_image, store_classification
 
 # Note: Using datetime.now(timezone.utc).isoformat() produces '+00:00' suffix
 # e.g., '2026-01-31T12:34:56.789012+00:00'
@@ -28,6 +29,68 @@ BQ_TABLE = f"{os.environ.get('GOOGLE_CLOUD_PROJECT')}.riverpulse.readings"
 @app.route('/')
 def health():
     return jsonify({"status": "healthy", "service": "riverpulse-api", "database": "firestore"})
+
+# ============ IMAGE CLASSIFICATION ============
+@app.route('/images/classify', methods=['POST'])
+def classify_image_endpoint():
+    """
+    Classify a gauge camera image.
+
+    Request body:
+    {
+        "gaugeId": "gauge-001",
+        "imageUri": "gs://bucket/images/photo.jpg"
+    }
+    """
+    data = request.get_json()
+    if not data or 'imageUri' not in data:
+        return jsonify({"error": "imageUri is required"}), 400
+
+    gauge_id = data.get('gaugeId', 'unknown')
+    image_uri = data['imageUri']
+
+    try:
+        classification = classify_image(image_uri)
+
+        # Check safe search flags before storing
+        if classification["flagged"]:
+            return jsonify({
+                "error": "Image flagged by safe search",
+                "reasons": classification["flag_reasons"],
+            }), 422
+
+        doc_id = store_classification(gauge_id, image_uri, classification)
+
+        return jsonify({
+            "id": doc_id,
+            "gaugeId": gauge_id,
+            "imageUri": image_uri,
+            "labels": classification["labels"],
+            "objects": classification["objects"],
+            "derivedCondition": classification["derived_condition"],
+            "flagged": classification["flagged"],
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/gauges/<gauge_id>/images', methods=['GET'])
+def get_gauge_images(gauge_id):
+    """Get image classifications for a specific gauge."""
+    query = db.collection("image-classifications") \
+        .where("gaugeId", "==", gauge_id) \
+        .order_by("timestamp", direction=firestore.Query.DESCENDING) \
+        .limit(20)
+
+    docs = query.stream()
+    classifications = []
+    for doc in docs:
+        d = doc.to_dict()
+        d["id"] = doc.id
+        classifications.append(d)
+
+    return jsonify({"gaugeId": gauge_id, "images": classifications})
 
 # ============ READINGS ============
 def log_structured(severity, message, **kwargs):
