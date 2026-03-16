@@ -6,6 +6,7 @@ import json
 import time
 from datetime import datetime, timezone, timedelta
 from classifier import classify_image, store_classification
+from assess_conditions import assess_gauge, store_assessment
 
 # Note: Using datetime.now(timezone.utc).isoformat() produces '+00:00' suffix
 # e.g., '2026-01-31T12:34:56.789012+00:00'
@@ -91,6 +92,40 @@ def get_gauge_images(gauge_id):
         classifications.append(d)
 
     return jsonify({"gaugeId": gauge_id, "images": classifications})
+
+
+# ============ AI ASSESSMENT ============
+@app.route('/assess', methods=['POST'])
+def assess_conditions_endpoint():
+    """
+    AI-powered multimodal gauge assessment.
+
+    Request body:
+    {
+        "gaugeId": "gauge-001",
+        "imageUri": "gs://bucket/images/photo.jpg"
+    }
+    """
+    data = request.get_json()
+    if not data or 'imageUri' not in data:
+        return jsonify({"error": "imageUri is required"}), 400
+
+    gauge_id = data.get('gaugeId', 'unknown')
+    image_uri = data['imageUri']
+
+    try:
+        assessment = assess_gauge(gauge_id, image_uri)
+        doc_id = store_assessment(gauge_id, image_uri, assessment)
+
+        return jsonify({
+            "id": doc_id,
+            "gaugeId": gauge_id,
+            "assessment": assessment,
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 # ============ READINGS ============
 def log_structured(severity, message, **kwargs):
