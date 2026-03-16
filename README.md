@@ -4,10 +4,7 @@
 
 Not toy examples - a system that can solve a real problem for a real community.
 
----
-
-## Important Note: Labs 9-17
-Labs 9-17 are archived in raw form.  
+> **Series 2 Now Available** — Labs 09–16 extend RiverPulse with operations, analytics, and multi-modal AI. See the full lab list below.
 
 ---
 
@@ -23,12 +20,8 @@ What people actually want to know is more nuanced. *Is it runnable? Is it optima
 
 A cloud-native system that ingests gauge readings, processes events, stores historical data, and classifies conditions. These labs build the pipeline piece by piece using simulated gauges.
 
-This is a demo - a foundation for something that could become real. The existing options for checking river conditions work, but there's room for better integration and visualization. I started sketching a mobile app last summer, but the AI tooling wasn't where I needed it to be to build what I envisioned. That gap is part of why I started building my own development tools.
+This is a demo - a foundation for something that could become real. The existing options for checking river conditions are limited, and can be difficult to navigate. There is ample opportunity for improvement. Maybe this becomes that. For now, it's a hands-on way to learn GCP by building something that matters. The architecture is real. The domain is real. The gauges are simulated - for now.
 
-For now, this is a hands-on way to learn GCP by building something that matters. The architecture is real. The domain is real. The gauges are simulated - for now.
-
-This is a demo - a foundation for something that could become real. The existing options for checking river conditions are limited, and can be difficult to navigate.  There is ample
-opportunity for improvement.  Maybe this becomes that. For now, it's a hands-on way to learn GCP by building something that matters.
 ```
 [Simulated gauge publishes reading]
     │
@@ -107,7 +100,7 @@ The goal is understanding, not just copy-paste. An AI accelerates learning when 
 
 ---
 
-## Labs
+## Series 1: Data Pipeline & Infrastructure
 
 | Lab | Topic | Time | What You'll Discuss in Interviews |
 |-----|-------|------|-----------------------------------|
@@ -120,23 +113,60 @@ The goal is understanding, not just copy-paste. An AI accelerates learning when 
 | 07 | [Storage Notifications](labs/07-storage-notifications.md) | 60-75 min | Event-driven processing, OBJECT_FINALIZE triggers |
 | 08 | [IoT + MQTT](labs/08-gcp-iot.md) | 90-120 min | Self-managed MQTT broker, device patterns, fleet management |
 
-**Total: ~8-10 hours** working through carefully with exploration.
+## Series 2: Operations, Analytics & AI
+
+| Lab | Topic | Time | What You'll Discuss in Interviews |
+|-----|-------|------|-----------------------------------|
+| 09 | [Secret Manager](labs/09-secret-manager.md) | 30-45 min | Secret versioning, IAM-scoped access |
+| 10 | [Monitoring & Alerting](labs/10-logging.md) | 45-60 min | Dashboards, structured logging, alert policies |
+| 11 | [BigQuery Analytics](labs/11-bigquery.md) | 60-90 min | OLAP warehouse, streaming inserts, window functions |
+| 12 | [Cloud Functions](labs/12-cloud-functions.md) | 45-60 min | Pub/Sub-triggered functions, Eventarc |
+| 13 | [Vision API](labs/13-vision-api.md) | 60-90 min | Image classification, label detection, safe search |
+| 14 | [Gemini Multimodal](labs/14-gemini-multimodal.md) | 60-90 min | google-genai SDK, image+text reasoning, JSON output |
+| 15 | [Audio Classification](labs/15-audio-classification.md) | 60-90 min | Gemini native audio, Cloud Function auto-trigger |
+| 16 | [Sensor Fusion](labs/16-sensor-fusion.md) | 75-105 min | Multi-modal correlation, fusion prompting, event state machine |
+
+**Total: ~15-20 hours** across both series, working through carefully with exploration.
+
+---
+
+## Snapshot Branches
+
+Each lab has a corresponding branch containing the code at that point of completion. Use these to check your work or jump to a specific lab's starting state.
+
+```
+lab-01-08   Series 1 complete
+lab-09      Secret Manager
+lab-10      Monitoring & Alerting
+lab-11      BigQuery Analytics
+lab-12      Cloud Functions
+lab-13      Vision API
+lab-14      Gemini Multimodal
+lab-15      Audio Classification
+lab-16      Sensor Fusion
+```
 
 ---
 
 ## Recommended Approach
 
-**Session 1 (2-3 hours):** Labs 1-3  
+**Session 1 (2-3 hours):** Labs 1-3
 Get the message pipeline working. Gauge readings flow through Pub/Sub to your API.
 
-**Session 2 (2-3 hours):** Labs 4-6  
+**Session 2 (2-3 hours):** Labs 4-6
 Add persistence (Firestore, Cloud Storage) and CI/CD.
 
-**Session 3 (2-3 hours):** Labs 7-8  
+**Session 3 (2-3 hours):** Labs 7-8
 Event-driven storage processing and IoT/MQTT device connectivity.
 
-**Session 4 (optional):**  
-Explore the console, run queries, practice explaining the architecture out loud, break something and fix it.
+**Session 4 (2-3 hours):** Labs 9-12
+Operations: secrets, monitoring, analytics, serverless functions.
+
+**Session 5 (3-4 hours):** Labs 13-15
+AI: Vision API, Gemini multimodal reasoning, audio classification.
+
+**Session 6 (2-3 hours):** Lab 16
+Sensor fusion: correlate all modalities into unified assessments.
 
 ---
 
@@ -213,6 +243,9 @@ You'll be able to:
 5. Talk through CI/CD pipelines and deployment automation
 6. Explain event-driven processing with storage notifications
 7. Discuss IoT patterns: MQTT brokers, device simulation, fleet management
+8. Explain the two-tier AI approach: fast CNN first pass → deep multimodal LLM reasoning
+9. Describe sensor fusion and why it reduces false positives
+10. Walk through the event lifecycle from raw sensor signal to alert
 
 This is the goal: hands-on experience backing up your architectural discussions.
 
@@ -228,6 +261,7 @@ All of this runs within GCP free tier or costs pennies:
 - Cloud Storage: 5GB free
 - Cloud Build: 120 build-minutes/day free
 - Compute Engine: e2-micro is free-tier eligible
+- Gemini API (via Vertex AI): Free tier available for low-volume usage
 
 Delete resources when done if concerned, but idle resources cost nearly nothing.
 
@@ -236,7 +270,7 @@ Delete resources when done if concerned, but idle resources cost nearly nothing.
 ## Structure
 ```
 gcp-labs/
-├── labs/           # The 8 lab guides
+├── labs/           # Lab guides (01-16)
 ├── src/
 │   ├── api/        # Cloud Run Flask API
 │   ├── mqtt/       # MQTT broker config and bridge
